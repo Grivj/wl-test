@@ -22,3 +22,7 @@ pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 sqlalchemy-stubs = "^0.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+
