@@ -1,7 +1,8 @@
 from typing import Generic, Type, TypeVar
 
-from model.base import BaseModel
 from sqlalchemy.orm import Query, Session
+
+from app.model.base import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -10,7 +11,7 @@ class BaseRepository(Generic[T]):
     def __init__(self, model: Type[T]):
         self.model = model
 
-    def _query(self, session: Session, *_: ..., **kwargs: ...) -> Query[T]:
+    def _query(self, session: Session, *_: ..., **kwargs: ...) -> "Query[T]":
         filters = [getattr(self.model, k) == v for k, v in kwargs.items()]
         return session.query(self.model).filter(*filters)  # type: ignore
 
