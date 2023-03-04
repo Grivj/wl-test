@@ -1,12 +1,12 @@
 """First migration
 
 Revision ID: 27bf2aa3b8c7
-Revises: 
+Revises:
 Create Date: 2022-05-19 15:22:57.500725
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from app.model.base import CustomUUID
 
