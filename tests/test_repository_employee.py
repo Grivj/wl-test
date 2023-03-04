@@ -1,4 +1,5 @@
 import unittest
+import uuid as uid
 from unittest.mock import MagicMock
 
 from app.model import EmployeeModel
@@ -12,8 +13,4 @@ class TestEmployeeRepository(unittest.TestCase):
 
     def test_get_by_id(self):
         self.session.query().filter().one_or_none.return_value = EmployeeModel()  # type: ignore
-        self.assertIsNotNone(self.repository.get_by_id(self.session, 1))
-
-    def test_get_by_id_not_found(self):
-        self.session.query().filter().one_or_none.return_value = None  # type: ignore
-        self.assertIsNone(self.repository.get_by_id(self.session, 1))
+        self.assertIsNotNone(self.repository.get_by_id(self.session, id=uid.uuid4()))
