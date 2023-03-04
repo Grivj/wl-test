@@ -151,3 +151,6 @@ app/tests/fixtures/csv/temp/*
 
 # VSCode
 .vscode/*
+
+# DS_Store
+.DS_Store
