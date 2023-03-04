@@ -8,6 +8,8 @@ from app.repository.employee import EmployeeRepository
 
 
 class _TeamRepository(BaseRepository[TeamModel]):
+    # TODO: Fix some coupling between this and the EmployeeRepository
+
     def get_by_name(self, session: Session, name: str) -> TeamModel | None:
         return (
             session.query(self.model)  # type: ignore

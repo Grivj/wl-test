@@ -12,8 +12,13 @@ class _EmployeeRepository(BaseRepository[EmployeeModel]):
     ) -> None:
         if not (employee := self.get_by_id(session, employee_id)):
             raise ValueError(f"Employee with id {employee_id} not found")
+        # if the employee is already in the team, raise an error
+        if team_id and employee.team_id == team_id:
+            raise ValueError(
+                f"Employee with id {employee_id} is already in team {team_id}"
+            )
 
-        employee.team_id = team_id
+        employee.team_id = team_id  # type: ignore
         self.update(session, employee)
 
 
