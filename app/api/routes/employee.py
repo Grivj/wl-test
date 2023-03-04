@@ -45,3 +45,11 @@ def remove_employee_from_team(session: Session = Depends(get_db), *, employee_id
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return {"message": "Removed team"}
+
+
+@router.delete("/{employee_id}", status_code=204)
+def delete_employee(session: Session = Depends(get_db), *, employee_id: UUID):
+    if not (employee := EmployeeRepository.get_by_id(session, employee_id)):
+        raise HTTPException(status_code=404, detail="Employee not found")
+    EmployeeRepository.delete(session, employee)
+    return {"message": "Deleted employee"}

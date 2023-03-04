@@ -55,6 +55,10 @@ class BaseRepository(Generic[T]):
         session.commit()
         return obj_in
 
+    def delete(self, session: Session, obj_in: T) -> None:
+        session.delete(obj_in)  # type: ignore
+        session.commit()
+
 
 class RepositoryException(Exception):
     pass
