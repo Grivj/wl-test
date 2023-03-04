@@ -2,14 +2,14 @@ import uuid as uid
 
 from sqlalchemy import Column
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import as_declarative
+from sqlalchemy.ext.declarative import as_declarative  # type: ignore[import]
 
 
 class CustomUUID(postgresql.UUID):
-    python_type = uid.UUID
+    python_type = uid.UUID  # type: ignore[assignment]
 
 
-@as_declarative()
+@as_declarative()  # type: ignore[call-arg]
 class BaseModel:
     id = Column(
         CustomUUID(as_uuid=True),
