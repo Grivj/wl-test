@@ -36,6 +36,9 @@ class BaseRepository(Generic[T]):
     def _create_from_dict(self, session: Session, obj_in: dict[str, Any]) -> T:
         return add_and_commit(session, self.model(**obj_in))
 
+    def get_by_id(self, session: Session, id: int) -> T | None:
+        return self.get(session, id=id)
+
 
 class RepositoryException(Exception):
     pass
