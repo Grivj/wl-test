@@ -1,10 +1,12 @@
+from sqlalchemy.orm import Session
+
 from app.model import EmployeeModel
 from app.repository.base import BaseRepository
 
 
-class _EmployeeRepository(BaseRepository):
-    def get_by_id(self, session, employee_id):
-        return self.query(session).filter(self.model.id == employee_id)
+class _EmployeeRepository(BaseRepository[EmployeeModel]):
+    def get_by_id(self, session: Session, employee_id: int) -> EmployeeModel | None:
+        return self.get(session, id=employee_id)
 
 
 EmployeeRepository = _EmployeeRepository(model=EmployeeModel)
