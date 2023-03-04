@@ -25,6 +25,9 @@ class TestEmployeeIsolatedRoute(unittest.TestCase):
         response = get_employee(
             self.session, employee_id=UUID("00000000-0000-0000-0000-000000000001")
         )
+        get.assert_called_once_with(
+            session=self.session, id=UUID("00000000-0000-0000-0000-000000000001")
+        )
         assert response == Employee(
             id=UUID("00000000-0000-0000-0000-000000000001"),
             first_name="John",
@@ -43,9 +46,9 @@ class TestEmployeeIsolatedRoute(unittest.TestCase):
     def test_create_employee(self, create: MagicMock):
         employee = EmployeeCreate(first_name="John", last_name="Doe")
         response = create_employee(session=self.session, employee=employee)
+        create.assert_called_once_with(session=self.session, obj_in=employee.dict())
         assert response == Employee(
             id=UUID("00000000-0000-0000-0000-000000000001"),
             first_name="John",
             last_name="Doe",
         )
-        create.assert_called_once_with(session=self.session, obj_in=employee.dict())
