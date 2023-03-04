@@ -1,10 +1,13 @@
+import uuid as uid
 from typing import Any, Generic, Type, TypeVar
 
+from pydantic import BaseModel as PydanticBaseModel
 from sqlalchemy.orm import Query, Session
 
 from app.model.base import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
+TSchema = TypeVar("TSchema", bound=PydanticBaseModel)
 
 
 class BaseRepository(Generic[T]):
@@ -36,8 +39,21 @@ class BaseRepository(Generic[T]):
     def _create_from_dict(self, session: Session, obj_in: dict[str, Any]) -> T:
         return add_and_commit(session, self.model(**obj_in))
 
-    def get_by_id(self, session: Session, id: int) -> T | None:
+    def get_by_id(self, session: Session, id: uid.UUID) -> T | None:
         return self.get(session, id=id)
+
+    def get_schema_by_id(
+        self,
+        session: Session,
+        id: uid.UUID,
+        response_schema: Type[TSchema],
+    ) -> TSchema | None:
+        if result := self.get(session, id=id):
+            return response_schema.from_orm(result)
+
+    def update(self, session: Session, obj_in: T) -> T:
+        session.commit()
+        return obj_in
 
 
 class RepositoryException(Exception):
@@ -53,5 +69,4 @@ def add_and_commit(session: Session, obj: T) -> T:
         raise RepositoryException(
             f"Error while adding {obj} to session: {str(e)}"
         ) from e
-    finally:
-        return obj
+    return obj

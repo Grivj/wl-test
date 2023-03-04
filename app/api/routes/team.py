@@ -5,16 +5,27 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.repository.team import TeamRepository
+from app.schema.employee import Employee
 from app.schema.team import Team, TeamCreate
 
 router = APIRouter()
 
 
 @router.get("/{team_id}", response_model=Team | None)
-def get_team(session: Session = Depends(get_db), *, team_id: UUID):
+def get_team(session: Session = Depends(get_db), *, team_id: UUID) -> Team | None:
     return TeamRepository.get_schema_by_id(
         session=session, id=team_id, response_schema=Team
     )
+
+
+@router.get("/{team_id}/employees", response_model=list[Employee])
+def get_team_employees(
+    session: Session = Depends(get_db), *, team_id: UUID
+) -> list[Employee]:
+    return [
+        Employee.from_orm(model)
+        for model in TeamRepository.get_employees(session, team_id)
+    ]
 
 
 @router.post("/", response_model=Team)
