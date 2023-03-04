@@ -14,6 +14,3 @@ class EmployeeCreate(EmployeeBase):
 
 class Employee(EmployeeBase):
     id: UUID
-
-    class Config:
-        orm_mode = True
