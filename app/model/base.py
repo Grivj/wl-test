@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import as_declarative  # type: ignore[import]
 
 
 class CustomUUID(types.TypeDecorator[uid.UUID]):
-    impl = types.CHAR
+    impl = types.CHAR(36)
     cache_ok = True
 
     def process_bind_param(self, value: uid.UUID | None, _):  # type: ignore[override]
