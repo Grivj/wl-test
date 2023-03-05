@@ -60,6 +60,11 @@ class BaseRepository(Generic[T]):
         session.delete(obj_in)  # type: ignore
         session.commit()
 
+    def delete_many(self, session: Session, objs_in: list[T]) -> None:
+        for obj in objs_in:
+            session.delete(obj)  # type: ignore
+        session.commit()
+
 
 class RepositoryException(Exception):
     pass
