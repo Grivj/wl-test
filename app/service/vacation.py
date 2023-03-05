@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from datetime import date
 
 from sqlalchemy.orm import Session
 
-from app.model.vacation import VacationModel
+from app.model import EmployeeModel, VacationModel
 from app.repository.vacation import VacationRepository
-from app.schema.vacation import VacationCreate
+from app.schema.vacation import VacationCreate, VacationType
 
 from .vacation_validators import OverlappingVacationTypeValidator, VacationValidator
 
@@ -77,6 +78,21 @@ class _VacationService:
         vacation.start_date = min(vacation.start_date, start_date)
         vacation.end_date = max(vacation.end_date, end_date)
         return vacation
+
+    def get_employees_in_vacation(
+        self,
+        session: Session,
+        start_date: date,
+        end_date: date,
+        type: VacationType | None = None,
+    ) -> set[EmployeeModel]:
+        vacations = self.repository.get_many(
+            session,
+            self.repository.model.start_date <= end_date,
+            self.repository.model.end_date >= start_date,
+            self.repository.model.type == type if type else True,
+        )
+        return {v.employee for v in vacations}
 
 
 VacationService = _VacationService(validators=[OverlappingVacationTypeValidator])

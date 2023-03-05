@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -5,10 +7,27 @@ from app.api.dependencies import get_employee_by_id, get_vacation_by_id
 from app.db.session import get_db
 from app.model import EmployeeModel, VacationModel
 from app.repository.vacation import VacationRepository
-from app.schema.vacation import Vacation, VacationCreate
+from app.schema.employee import Employee
+from app.schema.vacation import Vacation, VacationCreate, VacationType
 from app.service.vacation import VacationService
 
 router = APIRouter()
+
+
+@router.get("/search_employees_by_period", response_model=list[Employee])
+def search_employees_by_period(
+    *,
+    db: Session = Depends(get_db),
+    start_date: date,
+    end_date: date,
+    type: VacationType | None = None,
+) -> list[Employee]:
+    return [
+        Employee.from_orm(model)
+        for model in VacationService.get_employees_in_vacation(
+            db, start_date, end_date, type
+        )
+    ]
 
 
 @router.get("/{employee_id}", response_model=list[Vacation])

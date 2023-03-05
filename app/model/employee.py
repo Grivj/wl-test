@@ -15,3 +15,4 @@ class EmployeeModel(BaseModel):
     # ? should be of type relationship[TeamModel]
     # ? removed to avoid circular import for now
     team = relationship("TeamModel", back_populates="employees")  # type: ignore
+    vacations = relationship("VacationModel", back_populates="employee")  # type: ignore
