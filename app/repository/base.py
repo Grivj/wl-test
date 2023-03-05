@@ -23,7 +23,7 @@ class BaseRepository(Generic[T]):
         return self._query(session, *args, **kwargs).one_or_none()  # type: ignore
 
     def get_many(self, session: Session, *args: ..., **kwargs: ...) -> list[T]:
-        return self._query(session, *args, **kwargs).all()  # type: ignore
+        return self._query(session, *args, **kwargs).all()
 
     def create(self, session: Session, obj_in: dict[str, Any] | T) -> T:
         if isinstance(obj_in, dict):

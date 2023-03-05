@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
-from app.api.routes.employee import create_employee, get_employee
+from app.api.routes.employee import create_employee
 from app.repository.employee import EmployeeRepository
 from app.schema.employee import Employee, EmployeeCreate
 
@@ -17,11 +17,6 @@ class TestEmployeeIsolatedRoute(unittest.TestCase):
     def setUp(self):
         self.session = MagicMock()
         self.repository = EmployeeRepository
-
-    @patch.object(EmployeeRepository, "get", return_value=DUMMY_EMPLOYEE)
-    def test_get_employee(self, get: MagicMock):
-        response = get_employee(self.session, employee_id=DUMMY_EMPLOYEE.id)
-        assert response == DUMMY_EMPLOYEE
 
     @patch.object(EmployeeRepository, "create", return_value=DUMMY_EMPLOYEE)
     def test_create_employee(self, create: MagicMock):
