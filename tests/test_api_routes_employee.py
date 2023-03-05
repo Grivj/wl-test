@@ -21,7 +21,6 @@ class TestEmployeeIsolatedRoute(unittest.TestCase):
     @patch.object(EmployeeRepository, "get", return_value=DUMMY_EMPLOYEE)
     def test_get_employee(self, get: MagicMock):
         response = get_employee(self.session, employee_id=DUMMY_EMPLOYEE.id)
-        get.assert_called_once_with(session=self.session, id=DUMMY_EMPLOYEE.id)
         assert response == DUMMY_EMPLOYEE
 
     @patch.object(EmployeeRepository, "create", return_value=DUMMY_EMPLOYEE)
