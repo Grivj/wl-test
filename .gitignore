@@ -154,3 +154,6 @@ app/tests/fixtures/csv/temp/*
 
 # DS_Store
 .DS_Store
+
+# Stubs
+typings/
