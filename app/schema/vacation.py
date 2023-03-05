@@ -1,8 +1,9 @@
 from datetime import date
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class VacationType(StrEnum):
@@ -11,10 +12,17 @@ class VacationType(StrEnum):
 
 
 class VacationBase(BaseModel):
-    employee_id: UUID
-    end_date: date
     start_date: date
-    type: VacationType
+    end_date: date
+    employee_id: UUID
+    type: VacationType = VacationType.PAID
+
+    @validator("end_date")
+    def validate_end_date(cls, v: date, values: dict[str, Any]) -> date:
+        """End date must be greater or equal to start date."""
+        if v < values["start_date"]:
+            raise ValueError("End date must be greater or equal to start date")
+        return v
 
 
 class VacationCreate(VacationBase):
