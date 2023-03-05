@@ -66,7 +66,6 @@ class TestVacationComparisonService(unittest.TestCase):
         shared_days = self.comparison_service.compare_employees_vacations(
             self.session, self.jerome, self.jim, date(2021, 1, 1), date(2021, 1, 20)
         )
-        print(shared_days)
         self.assertEqual(len(shared_days), 2)
         self.assertEqual(shared_days[0], date(2021, 1, 3))
         self.assertEqual(shared_days[1], date(2021, 1, 4))

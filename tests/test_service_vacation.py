@@ -15,9 +15,18 @@ class TestVacationService(unittest.TestCase):
         self.session = get_test_db()
         self.service = VacationService
 
+        self.jerome = EmployeeRepository.create(
+            self.session,
+            {
+                "id": UUID("00000000-0000-0000-0000-000000000010"),
+                "first_name": "Jerome",
+                "last_name": "Powell",
+            },
+        )
+
     def test_create_vacation(self):
         vacation_data = VacationCreate(
-            employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+            employee_id=self.jerome.id,
             start_date=date(2021, 1, 1),
             end_date=date(2021, 1, 5),
             type=VacationType.PAID,
@@ -26,9 +35,7 @@ class TestVacationService(unittest.TestCase):
         vacation = self.service.create(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
-        self.assertEqual(
-            vacation.employee_id, UUID("00000000-0000-0000-0000-000000000000")
-        )
+        self.assertEqual(vacation.employee_id, self.jerome.id)
         self.assertEqual(vacation.start_date, date(2021, 1, 1))
         self.assertEqual(vacation.end_date, date(2021, 1, 5))
         self.assertEqual(vacation.type, VacationType.PAID)
@@ -37,7 +44,7 @@ class TestVacationService(unittest.TestCase):
         VacationRepository.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
@@ -46,14 +53,14 @@ class TestVacationService(unittest.TestCase):
         VacationRepository.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
             ).dict(),
         )
         vacation_data = VacationCreate(
-            employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+            employee_id=self.jerome.id,
             start_date=date(2021, 1, 2),
             end_date=date(2021, 1, 6),
             type=VacationType.PAID,
@@ -62,9 +69,7 @@ class TestVacationService(unittest.TestCase):
         vacation = self.service.create(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
-        self.assertEqual(
-            vacation.employee_id, UUID("00000000-0000-0000-0000-000000000000")
-        )
+        self.assertEqual(vacation.employee_id, self.jerome.id)
         self.assertEqual(vacation.start_date, date(2021, 1, 1))
         self.assertEqual(vacation.end_date, date(2021, 1, 7))
         self.assertEqual(vacation.type, VacationType.PAID)
@@ -73,14 +78,14 @@ class TestVacationService(unittest.TestCase):
         VacationRepository.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
             ).dict(),
         )
         vacation_data = VacationCreate(
-            employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+            employee_id=self.jerome.id,
             start_date=date(2021, 1, 6),
             end_date=date(2021, 1, 10),
             type=VacationType.PAID,
@@ -89,9 +94,7 @@ class TestVacationService(unittest.TestCase):
         vacation = self.service.create(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
-        self.assertEqual(
-            vacation.employee_id, UUID("00000000-0000-0000-0000-000000000000")
-        )
+        self.assertEqual(vacation.employee_id, self.jerome.id)
         self.assertEqual(vacation.start_date, date(2021, 1, 1))
         self.assertEqual(vacation.end_date, date(2021, 1, 10))
         self.assertEqual(vacation.type, VacationType.PAID)
@@ -132,7 +135,7 @@ class TestVacationService(unittest.TestCase):
         vacation = self.service.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
@@ -145,7 +148,7 @@ class TestVacationService(unittest.TestCase):
             self.session,
             vacation,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 2),
                 end_date=date(2021, 1, 6),
                 type=VacationType.PAID,
@@ -154,9 +157,7 @@ class TestVacationService(unittest.TestCase):
         self.assertIsInstance(updated_vacation, VacationModel)
 
         # assert the updates were successful
-        self.assertEqual(
-            updated_vacation.employee_id, UUID("00000000-0000-0000-0000-000000000000")
-        )
+        self.assertEqual(updated_vacation.employee_id, self.jerome.id)
         self.assertEqual(updated_vacation.start_date, date(2021, 1, 2))
         self.assertEqual(updated_vacation.end_date, date(2021, 1, 6))
         self.assertEqual(updated_vacation.type, VacationType.PAID)
@@ -166,7 +167,7 @@ class TestVacationService(unittest.TestCase):
         vacation = self.service.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
@@ -178,7 +179,7 @@ class TestVacationService(unittest.TestCase):
         VacationRepository.create(
             self.session,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
@@ -190,7 +191,7 @@ class TestVacationService(unittest.TestCase):
             self.session,
             vacation,
             VacationCreate(
-                employee_id=UUID("00000000-0000-0000-0000-000000000000"),
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 2),
                 end_date=date(2021, 1, 6),
                 type=VacationType.PAID,
@@ -199,9 +200,7 @@ class TestVacationService(unittest.TestCase):
         self.assertIsInstance(updated_vacation, VacationModel)
 
         # assert the updates were successful
-        self.assertEqual(
-            updated_vacation.employee_id, UUID("00000000-0000-0000-0000-000000000000")
-        )
+        self.assertEqual(updated_vacation.employee_id, self.jerome.id)
         self.assertEqual(updated_vacation.start_date, date(2021, 1, 2))
         self.assertEqual(updated_vacation.end_date, date(2021, 1, 7))
         self.assertEqual(updated_vacation.type, VacationType.PAID)

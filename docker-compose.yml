@@ -22,15 +22,20 @@ services:
     working_dir: /wl
     volumes:
       - ./app:/wl/app
-    command: [
+    command:
+      [
         "uvicorn",
-        "--host", "0.0.0.0",
-        "--port", "80",
-        "--reload-dir", "/wl/app",
-        "--log-level", "debug",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "80",
+        "--reload-dir",
+        "/wl/app",
+        "--log-level",
+        "debug",
         "--reload",
-        "app.main:app",
-    ]
+        "app.main:app"
+      ]
 
   worklife-test-db:
     container_name: worklife-test-db
@@ -47,6 +52,7 @@ services:
 
 volumes:
   technical-db-data:
+
 
 networks:
   technical-backend:
