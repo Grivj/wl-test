@@ -11,7 +11,7 @@ class EmployeeModel(BaseModel):
     last_name = Column(String)
     timezone = Column(String, default="Europe/Paris")
 
-    team_id = Column(CustomUUID(as_uuid=True), ForeignKey("team.id"), nullable=True)
+    team_id = Column(CustomUUID, ForeignKey("team.id"), nullable=True)
     # ? should be of type relationship[TeamModel]
     # ? removed to avoid circular import for now
     team = relationship("TeamModel", back_populates="employees")  # type: ignore
