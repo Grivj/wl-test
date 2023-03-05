@@ -3,6 +3,7 @@ from datetime import date
 from uuid import UUID
 
 from app.model import VacationModel
+from app.repository.employee import EmployeeRepository
 from app.repository.vacation import VacationRepository
 from app.schema.vacation import VacationCreate, VacationType
 from tests.utils import get_test_db
@@ -98,3 +99,56 @@ class TestVacationRepository(unittest.TestCase):
             ),
         )
         self.assertEqual(len(overlapping_vacations), 0)
+
+    def test_get_employee_vacations_time_constrained(self):
+        employee = EmployeeRepository.create(
+            self.session,
+            {
+                "id": UUID("00000000-0000-0000-0000-000000000000"),
+                "first_name": "Jerome",
+                "last_name": "Powell",
+            },
+        )
+        VacationRepository.create(
+            self.session,
+            VacationCreate(
+                employee_id=employee.id,
+                start_date=date(2021, 1, 1),
+                end_date=date(2021, 1, 5),
+            ).dict(),
+        )
+        VacationRepository.create(
+            self.session,
+            VacationCreate(
+                employee_id=employee.id,
+                start_date=date(2021, 1, 6),
+                end_date=date(2021, 1, 7),
+            ).dict(),
+        )
+        VacationRepository.create(
+            self.session,
+            VacationCreate(
+                employee_id=employee.id,
+                start_date=date(2021, 2, 1),
+                end_date=date(2021, 2, 5),
+            ).dict(),
+        )
+        VacationRepository.create(
+            self.session,
+            VacationCreate(
+                employee_id=employee.id,
+                start_date=date(2021, 2, 6),
+                end_date=date(2021, 2, 7),
+            ).dict(),
+        )
+        # get vacations from 2021-01-01 to 2021-01-31
+        vacations = VacationRepository.get_employee_vacations(
+            self.session, employee, date(2021, 1, 1), date(2021, 1, 31)
+        )
+        self.assertEqual(len(vacations), 2)
+
+        # get vacations from 2021-02-01 to 2021-02-28
+        vacations = VacationRepository.get_employee_vacations(
+            self.session, employee, date(2021, 2, 1), date(2021, 2, 28)
+        )
+        self.assertEqual(len(vacations), 2)
