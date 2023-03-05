@@ -14,15 +14,16 @@ class BaseRepository(Generic[T]):
     def __init__(self, model: Type[T]):
         self.model = model
 
-    def _query(self, session: Session, *_: ..., **kwargs: ...) -> "Query[T]":
+    def _query(self, session: Session, *args: ..., **kwargs: ...) -> "Query[T]":
         filters = [getattr(self.model, k) == v for k, v in kwargs.items()]
+        filters.extend(iter(args))
         return session.query(self.model).filter(*filters)  # type: ignore
 
-    def get(self, session: Session, *_: ..., **kwargs: ...) -> T | None:
-        return self._query(session, **kwargs).one_or_none()  # type: ignore
+    def get(self, session: Session, *args: ..., **kwargs: ...) -> T | None:
+        return self._query(session, *args, **kwargs).one_or_none()  # type: ignore
 
-    def get_many(self, session: Session, *_: ..., **kwargs: ...) -> list[T]:
-        return self._query(session, **kwargs).all()  # type: ignore
+    def get_many(self, session: Session, *args: ..., **kwargs: ...) -> list[T]:
+        return self._query(session, *args, **kwargs).all()  # type: ignore
 
     def create(self, session: Session, obj_in: dict[str, Any] | T) -> T:
         if isinstance(obj_in, dict):
