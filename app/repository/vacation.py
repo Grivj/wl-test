@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from sqlalchemy.orm import Session
 
 from app.model import VacationModel
@@ -9,12 +11,15 @@ class _VacationRepository(BaseRepository[VacationModel]):
     def get_overlapping_vacations(
         self, session: Session, vacation: VacationCreate
     ) -> list[VacationModel]:
-        """Returns a list of vacations that overlap with the given vacation."""
+        """
+        Returns a list of vacations that overlap or contiguously touch the given
+        vacation.
+        """
         return self.get_many(
             session,
             self.model.employee_id == vacation.employee_id,
-            self.model.start_date <= vacation.end_date,
-            self.model.end_date >= vacation.start_date,
+            self.model.start_date <= vacation.end_date + timedelta(days=1),
+            self.model.end_date >= vacation.start_date - timedelta(days=1),
         )
 
 
