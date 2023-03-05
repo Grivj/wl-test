@@ -1,6 +1,3 @@
-from datetime import date
-from uuid import UUID
-
 from sqlalchemy.orm import Session
 
 from app.model import VacationModel
@@ -16,15 +13,9 @@ class _VacationRepository(BaseRepository[VacationModel]):
         return self.get_many(
             session,
             self.model.employee_id == vacation.employee_id,
-            self.model.type == vacation.type,
             self.model.start_date <= vacation.end_date,
             self.model.end_date >= vacation.start_date,
         )
-
-    def merge_vacations(
-        self, session: Session, overlapping_vacations: list[VacationModel]
-    ) -> None:
-        ...
 
 
 VacationRepository = _VacationRepository(model=VacationModel)
