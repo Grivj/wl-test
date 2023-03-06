@@ -1,10 +1,28 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.model import EmployeeModel, TeamModel
 from app.repository.base import BaseRepository
+from app.schema.employee import EmployeeCreate
+from app.serializers import Serializer
 
 
 class _EmployeeRepository(BaseRepository[EmployeeModel]):
+    serializer = Serializer(EmployeeModel)
+
+    def create_employee(
+        self, session: Session, employee: EmployeeCreate
+    ) -> EmployeeModel:
+        model = self.serializer.deserialize(employee)
+        return self.create(session, model)
+
+    def get_employee_by_id(self, session: Session, id: UUID) -> EmployeeModel | None:
+        return self.get(session, id=id)
+
+    def delete_employee(self, session: Session, employee: EmployeeModel) -> None:
+        self.delete(session, employee)
+
     def update_team(
         self, session: Session, employee: EmployeeModel, team: TeamModel
     ) -> None:
@@ -22,4 +40,4 @@ class _EmployeeRepository(BaseRepository[EmployeeModel]):
         self.update(session, employee)
 
 
-EmployeeRepository = _EmployeeRepository(model=EmployeeModel)
+EmployeeRepository = _EmployeeRepository(EmployeeModel)
