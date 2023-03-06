@@ -1,3 +1,17 @@
+# Author's preface
+
+This technical test is a project that implements a vacation management system using Domain-Driven Design (DDD) principles. It was a great learning experience for me as I was not familiar with DDD before this test. However, I understand now that there were some issues with my implementation and I did not fully adhere to some of the DDD principles, such as making services stateless and using services in the endpoint instead of the repository.
+
+I made a conscious effort to make the code strongly type hinted and added typing to the base repository that was missing previously. Additionally, I changed the CustomUUID field to make it easier to run unit tests, which resulted in having to recreate the tables in the database with the new underlying type (Char(36)).
+
+Please note that this project is not production-ready and there are still several features that need to be added, such as authentication. Nevertheless, I hope this project provides a glimpse into my coding abilities and how I approached the technical test.
+
+
+
+
+
+
+
 # Worklife Python Technical test
 
 This project serves as a technical test for middle-senior backend developers in Python.
