@@ -14,14 +14,14 @@ router = APIRouter()
 
 
 @router.get("/{employee_id}", response_model=Employee | None)
-def get_employee(
+async def get_employee(
     employee: EmployeeModel = Depends(get_employee_by_id),
 ) -> Employee | None:
     return Employee.from_orm(employee)
 
 
 @router.get("/{employee_id}/balance", response_model=Balance | None)
-def get_employee_balance(
+async def get_employee_balance(
     session: Session = Depends(get_db),
     employee: EmployeeModel = Depends(get_employee_by_id),
 ) -> Balance | None:
@@ -31,7 +31,7 @@ def get_employee_balance(
 
 
 @router.post("/", response_model=Employee)
-def create_employee(
+async def create_employee(
     session: Session = Depends(get_db),
     *,
     employee: EmployeeCreate,
@@ -45,7 +45,7 @@ def create_employee(
 
 
 @router.put("/{employee_id}/team", status_code=status.HTTP_200_OK)
-def add_employee_to_team(
+async def add_employee_to_team(
     session: Session = Depends(get_db),
     *,
     employee: EmployeeModel = Depends(get_employee_by_id),
@@ -56,7 +56,7 @@ def add_employee_to_team(
 
 
 @router.delete("/{employee_id}/team", status_code=status.HTTP_200_OK)
-def remove_employee_from_team(
+async def remove_employee_from_team(
     session: Session = Depends(get_db),
     *,
     employee: EmployeeModel = Depends(get_employee_by_id),
@@ -66,7 +66,7 @@ def remove_employee_from_team(
 
 
 @router.delete("/{employee_id}", status_code=status.HTTP_200_OK)
-def delete_employee(
+async def delete_employee(
     session: Session = Depends(get_db),
     *,
     employee: EmployeeModel = Depends(get_employee_by_id),

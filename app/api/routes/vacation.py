@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/search_employees_by_period", response_model=list[Employee])
-def search_employees_by_period(
+async def search_employees_by_period(
     *,
     db: Session = Depends(get_db),
     start_date: date,
@@ -34,7 +34,7 @@ def search_employees_by_period(
 
 
 @router.get("/compare_employees_vacations", response_model=list[date])
-def compare_employees_vacations(
+async def compare_employees_vacations(
     *,
     db: Session = Depends(get_db),
     employee_1_id: UUID,
@@ -56,7 +56,7 @@ def compare_employees_vacations(
 
 
 @router.get("/{employee_id}", response_model=list[Vacation])
-def get_employee_vacations(
+async def get_employee_vacations(
     employee: EmployeeModel = Depends(get_employee_by_id), db: Session = Depends(get_db)
 ) -> list[Vacation]:
     return [
@@ -66,7 +66,7 @@ def get_employee_vacations(
 
 
 @router.post("/{employee_id}", response_model=Vacation)
-def create_employee_vacation(
+async def create_employee_vacation(
     *,
     db: Session = Depends(get_db),
     employee: EmployeeModel = Depends(get_employee_by_id),
@@ -96,7 +96,7 @@ async def delete_vacation(
 
 
 @router.put("/{employee_id}/vacations/{vacation_id}", status_code=status.HTTP_200_OK)
-def update_vacation(
+async def update_vacation(
     *,
     db: Session = Depends(get_db),
     employee: EmployeeModel = Depends(get_employee_by_id),
