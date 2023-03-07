@@ -46,5 +46,3 @@ class EmployeeRepository(BaseRepository[EmployeeModel]):
     def remove_team(self, session: Session, employee: EmployeeModel) -> None:
         employee.team_id = None  # type: ignore
         self.update(session, employee)
-
-

@@ -36,5 +36,3 @@ class BalanceRepository(BaseRepository[BalanceModel]):
         balance.balance += amount  # type: ignore
         self.update(session, balance)
         return balance
-
-
