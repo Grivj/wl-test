@@ -1,15 +1,17 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.model import BalanceModel, EmployeeModel, TeamModel, VacationModel
-from app.repository.balance import BalanceRepository
-from app.repository.employee import EmployeeRepository
-from app.repository.team import TeamRepository
-from app.repository.vacation import VacationRepository
-from app.service.employee import EmployeeService
+from app.repository import (
+    BalanceRepository,
+    EmployeeRepository,
+    TeamRepository,
+    VacationRepository,
+)
+from app.service import EmployeeService, VacationService
 
 
 async def get_employee_repository() -> EmployeeRepository:
@@ -45,6 +47,18 @@ async def get_employee_service(
     )
 
 
+async def get_vacation_service(
+    db: Session = Depends(get_db),
+    vacation_repository: VacationRepository = Depends(get_vacation_repository),
+    balance_repository: BalanceRepository = Depends(get_balance_repository),
+) -> VacationService:
+    """Returns an instance of the vacation service."""
+    return VacationService(
+        vacation_repository,
+        balance_repository,
+    )
+
+
 async def get_employee_by_id(
     *,
     employee_service: EmployeeService = Depends(get_employee_service),
@@ -53,17 +67,17 @@ async def get_employee_by_id(
     return employee_service.get_employee(employee_id)
 
 
-def get_team_by_id(db: Session = Depends(get_db), *, team_id: UUID) -> TeamModel:
-    """Returns a team by id or raises an HTTPException if not found."""
-    if not (team := TeamRepository.get_by_id(db, team_id)):
-        raise HTTPException(status_code=404, detail="Team not found")
-    return team
+# def get_team_by_id(
+#     *, team_repository: TeamService = Depends(get_team_repository), team_id: UUID
+# ) -> TeamModel:
+#     """Returns a team by id or raises an HTTPException if not found."""
+#     return team_repository.get_by_id(team_id)
 
 
-def get_vacation_by_id(
-    db: Session = Depends(get_db), *, vacation_id: UUID
-) -> VacationModel:
-    """Returns a vacation by id or raises an HTTPException if not found."""
-    if not (vacation := VacationRepository.get_by_id(db, vacation_id)):
-        raise HTTPException(status_code=404, detail="Vacation not found")
-    return vacation
+# def get_vacation_by_id(
+#     db: Session = Depends(get_db), *, vacation_id: UUID
+# ) -> VacationModel:
+#     """Returns a vacation by id or raises an HTTPException if not found."""
+#     if not (vacation := VacationRepository.get_by_id(db, vacation_id)):
+#         raise HTTPException(status_code=404, detail="Vacation not found")
+#     return vacation
