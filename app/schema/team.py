@@ -11,8 +11,16 @@ class TeamCreate(TeamBase):
     ...
 
 
-class Team(TeamBase):
+class TeamUpdate(BaseModel):
+    name: str | None = None
+
+
+class TeamInDB(TeamBase):
     id: UUID
 
     class Config:
         orm_mode = True
+
+
+class Team(TeamInDB):
+    ...
