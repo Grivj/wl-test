@@ -30,8 +30,12 @@ class EmployeeUpdate(BaseModel):
     last_name: str | None = None
 
 
-class Employee(EmployeeBase):
+class EmployeeInDB(EmployeeBase):
     id: UUID
 
     class Config:
         orm_mode = True
+
+
+class Employee(EmployeeInDB):
+    ...

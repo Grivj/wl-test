@@ -8,7 +8,7 @@ from app.schema.employee import EmployeeCreate, EmployeeUpdate
 from app.serializers import Serializer
 
 
-class _EmployeeRepository(BaseRepository[EmployeeModel]):
+class EmployeeRepository(BaseRepository[EmployeeModel]):
     serializer = Serializer(EmployeeModel)
 
     def create_employee(
@@ -48,4 +48,3 @@ class _EmployeeRepository(BaseRepository[EmployeeModel]):
         self.update(session, employee)
 
 
-EmployeeRepository = _EmployeeRepository(EmployeeModel)

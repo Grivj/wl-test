@@ -2,6 +2,7 @@ import unittest
 
 from pydantic import ValidationError
 
+from app.model import EmployeeModel
 from app.repository.employee import EmployeeRepository
 from app.schema.employee import EmployeeCreate, EmployeeUpdate
 from tests.utils import get_test_db
@@ -10,7 +11,7 @@ from tests.utils import get_test_db
 class TestEmployeeRepository(unittest.TestCase):
     def setUp(self):
         self.session = get_test_db()
-        self.repository = EmployeeRepository
+        self.repository = EmployeeRepository(EmployeeModel)
 
         self.dummy_employee = EmployeeCreate(
             first_name="Jerome",

@@ -7,7 +7,7 @@ from app.repository.base import BaseRepository
 from app.schema.balance import BalanceCreate
 
 
-class _BalanceRepository(BaseRepository[BalanceModel]):
+class BalanceRepository(BaseRepository[BalanceModel]):
     def create_for_employee(
         self, session: Session, employee: EmployeeModel, balance_amount: int = 10
     ) -> BalanceModel:
@@ -38,4 +38,3 @@ class _BalanceRepository(BaseRepository[BalanceModel]):
         return balance
 
 
-BalanceRepository = _BalanceRepository(model=BalanceModel)

@@ -21,8 +21,8 @@ class TestEmployeeIsolatedRoute(unittest.TestCase):
         self.session = MagicMock()
         self.repository = EmployeeRepository
 
-    @patch.object(EmployeeService, "create_with_balance", return_value=DUMMY_EMPLOYEE)
-    def test_create_employee(self, create: MagicMock):
+    @patch.object(EmployeeService, "create_employee", return_value=DUMMY_EMPLOYEE)
+    def test_create_employee(self):
         employee = EmployeeCreate(
             first_name=DUMMY_EMPLOYEE.first_name, last_name=DUMMY_EMPLOYEE.last_name
         )

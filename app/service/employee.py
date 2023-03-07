@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from uuid import UUID
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.model import EmployeeModel
@@ -9,23 +11,29 @@ from app.schema.employee import EmployeeCreate
 
 
 @dataclass
-class _EmployeeService:
-    repository = EmployeeRepository
-    balance_repository = BalanceRepository
+class EmployeeService:
+    session: Session
+    repository: EmployeeRepository
+    balance_repository: BalanceRepository
 
-    def create_with_balance(
+    def create_employee(
         self,
-        session: Session,
         employee_create: EmployeeCreate,
         balance_amount: int = 10,
     ) -> EmployeeModel:
-        employee = self.repository.create(session, employee_create.dict())
-        self.balance_repository.create_for_employee(session, employee, balance_amount)
+        employee = self.repository.create_employee(self.session, employee_create)
+        self.balance_repository.create_for_employee(
+            self.session, employee, balance_amount
+        )
         return employee
 
-    def delete(self, session: Session, employee: EmployeeModel):
-        self.balance_repository.delete_by_employee_id(session, employee.id)
-        self.repository.delete(session, employee)
+    def delete_employee(self, employee: EmployeeModel):
+        self.balance_repository.delete_by_employee_id(self.session, employee.id)
+        self.repository.delete_employee(self.session, employee)
 
-
-EmployeeService = _EmployeeService()
+    def get_employee(self, employee_id: UUID) -> EmployeeModel:
+        if not (
+            employee := self.repository.get_employee_by_id(self.session, employee_id)
+        ):
+            raise HTTPException(status_code=404, detail="Employee not found")
+        return employee

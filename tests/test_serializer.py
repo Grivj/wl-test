@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 from app.model.employee import EmployeeModel
-from app.schema.employee import Employee, EmployeeCreate
+from app.schema.employee import Employee
 from app.serializers import Serializer
 
 
