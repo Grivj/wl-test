@@ -29,8 +29,19 @@ class VacationCreate(VacationBase):
     ...
 
 
-class Vacation(VacationBase):
+class VacationUpdate(BaseModel):
+    start_date: date | None = None
+    end_date: date | None = None
+    employee_id: UUID | None = None
+    type: VacationType | None = None
+
+
+class VacationInDB(VacationBase):
     id: UUID
 
     class Config:
         orm_mode = True
+
+
+class Vacation(VacationInDB):
+    ...
