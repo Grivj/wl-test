@@ -33,9 +33,6 @@ class BaseRepository(Generic[T]):
             raise e
         return model
 
-    def get_by_id(self, session: Session, id: uid.UUID) -> T | None:
-        return self.get(session, id=id)
-
     def update(self, session: Session, model: T) -> T:
         session.commit()
         return model
