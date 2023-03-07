@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from sqlalchemy.orm import Session
@@ -16,16 +16,21 @@ from .vacation_validators import (
 
 
 @dataclass
-class _VacationService:
-    validators: list[VacationValidator]
-    repository = VacationRepository
-    balance_repository = BalanceRepository
+class VacationService:
+    repository: VacationRepository
+    balance_repository: BalanceRepository
+    validators: list[VacationValidator] = field(
+        default_factory=lambda: [
+            OverlappingVacationTypeValidator(),
+        ]
+    )
 
-    def create(self, session: Session, vacation: VacationCreate) -> VacationModel:
+    def create_vacation(
+        self, session: Session, vacation: VacationCreate
+    ) -> VacationModel:
         overlapping_vacations = self.repository.get_overlapping_vacations(
             session, vacation
         )
-
         for validator in self.validators:
             validator.validate(
                 session, vacation=vacation, overlapping_vacations=overlapping_vacations
@@ -34,9 +39,8 @@ class _VacationService:
             return self.handle_overlapping_vacations(
                 session, vacation, overlapping_vacations
             )
-        created_vacation = self.repository.create(session, vacation.dict())
+        created_vacation = self.repository.create_vacation(session, vacation)
         # updating the employee balance
-        print("created_vacation")
         self.update_balance_by_vacation(session, created_vacation)
         return created_vacation
 
@@ -81,7 +85,7 @@ class _VacationService:
     ) -> VacationModel:
         merged_vacation = self.merge_vacations(session, vacation, overlapping_vacations)
         self.repository.delete_many(session, overlapping_vacations)
-        created_vacation = self.repository.create(session, merged_vacation.dict())
+        created_vacation = self.repository.create_vacation(session, merged_vacation)
         # updating the employee balance
         self.update_balance_by_vacation(session, created_vacation)
         return created_vacation
@@ -139,6 +143,3 @@ class _VacationService:
         calendar = get_calendar_for_tz("Europe/Paris")
 
         return calendar.get_working_days_delta(vacation.start_date, vacation.end_date)  # type: ignore
-
-
-VacationService = _VacationService(validators=[OverlappingVacationTypeValidator])

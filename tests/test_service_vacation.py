@@ -2,29 +2,43 @@ import unittest
 from datetime import date
 from uuid import UUID
 
+from app.api.dependencies import get_employee_repository, get_vacation_service
 from app.model import VacationModel
-from app.repository.employee import EmployeeRepository
-from app.repository.vacation import VacationRepository
+from app.schema.employee import EmployeeCreate
 from app.schema.vacation import VacationCreate, VacationType
-from app.service.vacation import VacationService
 from tests.utils import get_test_db
 
 
 class TestVacationService(unittest.TestCase):
-    def setUp(self):
+    async def asyncSetUp(self):
         self.session = get_test_db()
-        self.service = VacationService
+        self.service = await get_vacation_service()
+        self.employee_repository = await get_employee_repository()
 
-        self.jerome = EmployeeRepository.create(
+        # create some dummy employees
+        self.jerome = self.employee_repository.create_employee(
             self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000010"),
-                "first_name": "Jerome",
-                "last_name": "Powell",
-            },
+            EmployeeCreate(
+                first_name="Jerome",
+                last_name="Powell",
+            ),
+        )
+        self.jim = self.employee_repository.create_employee(
+            self.session,
+            EmployeeCreate(
+                first_name="Jim",
+                last_name="Cramer",
+            ),
+        )
+        self.elisabeth = self.employee_repository.create_employee(
+            self.session,
+            EmployeeCreate(
+                first_name="Elisabeth",
+                last_name="Warren",
+            ),
         )
 
-    def test_create_vacation(self):
+    async def test_create_vacation(self):
         vacation_data = VacationCreate(
             employee_id=self.jerome.id,
             start_date=date(2021, 1, 1),
@@ -32,7 +46,7 @@ class TestVacationService(unittest.TestCase):
             type=VacationType.PAID,
         )
 
-        vacation = self.service.create(self.session, vacation_data)
+        vacation = self.service.create_vacation(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
         self.assertEqual(vacation.employee_id, self.jerome.id)
@@ -40,24 +54,24 @@ class TestVacationService(unittest.TestCase):
         self.assertEqual(vacation.end_date, date(2021, 1, 5))
         self.assertEqual(vacation.type, VacationType.PAID)
 
-    def test_create_vacation_with_overlapping_vacations(self):
-        VacationRepository.create(
+    async def test_create_vacation_with_overlapping_vacations(self):
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
-        VacationRepository.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
         vacation_data = VacationCreate(
             employee_id=self.jerome.id,
@@ -66,7 +80,7 @@ class TestVacationService(unittest.TestCase):
             type=VacationType.PAID,
         )
 
-        vacation = self.service.create(self.session, vacation_data)
+        vacation = self.service.create_vacation(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
         self.assertEqual(vacation.employee_id, self.jerome.id)
@@ -74,15 +88,15 @@ class TestVacationService(unittest.TestCase):
         self.assertEqual(vacation.end_date, date(2021, 1, 7))
         self.assertEqual(vacation.type, VacationType.PAID)
 
-    def test_create_vacation_with_contiguous_vacations(self):
-        VacationRepository.create(
+    async def test_create_vacation_with_contiguous_vacations(self):
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
         vacation_data = VacationCreate(
             employee_id=self.jerome.id,
@@ -91,7 +105,7 @@ class TestVacationService(unittest.TestCase):
             type=VacationType.PAID,
         )
 
-        vacation = self.service.create(self.session, vacation_data)
+        vacation = self.service.create_vacation(self.session, vacation_data)
 
         self.assertIsInstance(vacation, VacationModel)
         self.assertEqual(vacation.employee_id, self.jerome.id)
@@ -99,24 +113,24 @@ class TestVacationService(unittest.TestCase):
         self.assertEqual(vacation.end_date, date(2021, 1, 10))
         self.assertEqual(vacation.type, VacationType.PAID)
 
-    def test_create_vacation_with_overlapping_vacations_but_wrong_type(self):
-        VacationRepository.create(
+    async def test_create_vacation_with_overlapping_vacations_but_wrong_type(self):
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=UUID("00000000-0000-0000-0000-000000000000"),
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 5),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
-        VacationRepository.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=UUID("00000000-0000-0000-0000-000000000000"),
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
         # this vacation overlaps with the previous two
         # but it's of a different type
@@ -130,9 +144,9 @@ class TestVacationService(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.service.create(self.session, vacation_data)
 
-    def test_update_vacation(self):
+    async def test_update_vacation(self):
         # create a vacation
-        vacation = self.service.create(
+        vacation = self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
@@ -162,9 +176,9 @@ class TestVacationService(unittest.TestCase):
         self.assertEqual(updated_vacation.end_date, date(2021, 1, 6))
         self.assertEqual(updated_vacation.type, VacationType.PAID)
 
-    def test_update_vacation_with_overlapping_vacations(self):
+    async def test_update_vacation_with_overlapping_vacations(self):
         # create a vacation
-        vacation = self.service.create(
+        vacation = self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
@@ -176,14 +190,14 @@ class TestVacationService(unittest.TestCase):
         self.assertIsInstance(vacation, VacationModel)
 
         # create another vacation
-        VacationRepository.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
-            ).dict(),
+            ),
         )
 
         # update the vacation
@@ -205,65 +219,39 @@ class TestVacationService(unittest.TestCase):
         self.assertEqual(updated_vacation.end_date, date(2021, 1, 7))
         self.assertEqual(updated_vacation.type, VacationType.PAID)
 
-    def test_get_employees_in_vacation(self):
-        # create some employees
-        jerome = EmployeeRepository.create(
-            self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000000"),
-                "first_name": "Jerome",
-                "last_name": "Powell",
-            },
-        )
-        jim = EmployeeRepository.create(
-            self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000001"),
-                "first_name": "Jim",
-                "last_name": "Cramer",
-            },
-        )
-        elisabeth = EmployeeRepository.create(
-            self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000002"),
-                "first_name": "Elisabeth",
-                "last_name": "Warren",
-            },
-        )
-
+    async def test_get_employees_in_vacation(self):
         # create some vacations
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jerome.id,
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 3),
                 type=VacationType.PAID,
             ),
         )
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jerome.id,
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 5),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
             ),
         )
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jim.id,
+                employee_id=self.jim.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 4),
                 type=VacationType.UNPAID,
             ),
         )
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=elisabeth.id,
+                employee_id=self.elisabeth.id,
                 start_date=date(2021, 1, 11),
                 end_date=date(2021, 1, 20),
                 type=VacationType.PAID,
@@ -279,50 +267,32 @@ class TestVacationService(unittest.TestCase):
         # assert the employees were returned
         self.assertIsInstance(employees, set)
         self.assertEqual(len(employees), 2)
-        self.assertEqual(employees, {jerome, jim})
+        self.assertEqual(employees, {self.jerome, self.jim})
 
-    def test_get_employees_in_vacation_by_type(self):
-        # create some employees
-        jerome = EmployeeRepository.create(
-            self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000000"),
-                "first_name": "Jerome",
-                "last_name": "Powell",
-            },
-        )
-        jim = EmployeeRepository.create(
-            self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000001"),
-                "first_name": "Jim",
-                "last_name": "Cramer",
-            },
-        )
-
+    async def test_get_employees_in_vacation_by_type(self):
         # create some vacations
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jerome.id,
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 1),
                 end_date=date(2021, 1, 3),
                 type=VacationType.PAID,
             ),
         )
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jerome.id,
+                employee_id=self.jerome.id,
                 start_date=date(2021, 1, 5),
                 end_date=date(2021, 1, 7),
                 type=VacationType.PAID,
             ),
         )
-        self.service.create(
+        self.service.create_vacation(
             self.session,
             VacationCreate(
-                employee_id=jim.id,
+                employee_id=self.jim.id,
                 start_date=date(2021, 1, 3),
                 end_date=date(2021, 1, 4),
                 type=VacationType.UNPAID,
@@ -336,4 +306,4 @@ class TestVacationService(unittest.TestCase):
 
         # assert the employees were returned
         self.assertEqual(len(employees), 1)
-        self.assertEqual(employees, {jim})
+        self.assertEqual(employees, {self.jim})
