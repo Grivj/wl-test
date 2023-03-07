@@ -15,8 +15,8 @@ def get_date_range(start_date: date, end_date: date) -> Generator[date, None, No
 
 
 @dataclass
-class _VacationComparisonService:
-    repository = VacationRepository
+class VacationComparisonService:
+    repository: VacationRepository
 
     def compare_employees_vacations(
         self,
@@ -49,6 +49,3 @@ class _VacationComparisonService:
             for vacation in vacations
             for date in get_date_range(vacation.start_date, vacation.end_date)
         }
-
-
-VacationComparisonService = _VacationComparisonService()

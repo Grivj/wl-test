@@ -1,40 +1,41 @@
 import unittest
 from datetime import date
-from uuid import UUID
 
-from app.repository.employee import EmployeeRepository
+from app.api.dependencies import (
+    get_employee_repository,
+    get_vacation_comparison_service,
+    get_vacation_service,
+)
+from app.schema.employee import EmployeeCreate
 from app.schema.vacation import VacationCreate
-from app.service.vacation import VacationService
-from app.service.vacation_comparison import VacationComparisonService
 from tests.utils import get_test_db
 
 
 class TestVacationComparisonService(unittest.TestCase):
-    def setUp(self):
+    async def asyncSetUp(self):
         self.session = get_test_db()
-        self.service = VacationService
-        self.comparison_service = VacationComparisonService
+        self.vacation_service = await get_vacation_service()
+        self.comparison_service = await get_vacation_comparison_service()
+        self.employee_repository = await get_employee_repository()
 
-        self.jerome = EmployeeRepository.create(
+        self.jerome = self.employee_repository.create_employee(
             self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000000"),
-                "first_name": "Jerome",
-                "last_name": "Powell",
-            },
+            EmployeeCreate(
+                first_name="Jerome",
+                last_name="Powell",
+            ),
         )
-        self.jim = EmployeeRepository.create(
+        self.jim = self.employee_repository.create_employee(
             self.session,
-            {
-                "id": UUID("00000000-0000-0000-0000-000000000001"),
-                "first_name": "Jim",
-                "last_name": "Cramer",
-            },
+            EmployeeCreate(
+                first_name="Jim",
+                last_name="Cramer",
+            ),
         )
 
-    def test_employees_vacation_shared_days(self):
+    async def test_employees_vacation_shared_days(self):
         # create some vacations
-        self.service.create(
+        self.vacation_service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jerome.id,
@@ -42,7 +43,7 @@ class TestVacationComparisonService(unittest.TestCase):
                 end_date=date(2021, 1, 4),
             ),
         )
-        self.service.create(
+        self.vacation_service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jim.id,
@@ -50,7 +51,7 @@ class TestVacationComparisonService(unittest.TestCase):
                 end_date=date(2021, 1, 5),
             ),
         )
-        self.service.create(
+        self.vacation_service.create_vacation(
             self.session,
             VacationCreate(
                 employee_id=self.jim.id,

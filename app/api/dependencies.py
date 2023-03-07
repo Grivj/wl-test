@@ -11,7 +11,7 @@ from app.repository import (
     TeamRepository,
     VacationRepository,
 )
-from app.service import EmployeeService, VacationService
+from app.service import EmployeeService, VacationComparisonService, VacationService
 
 
 async def get_employee_repository() -> EmployeeRepository:
@@ -56,6 +56,15 @@ async def get_vacation_service(
     return VacationService(
         vacation_repository,
         balance_repository,
+    )
+
+
+async def get_vacation_comparison_service(
+    vacation_repository: VacationRepository = Depends(get_vacation_repository),
+) -> VacationComparisonService:
+    """Returns an instance of the vacation comparison service."""
+    return VacationComparisonService(
+        vacation_repository,
     )
 
 
