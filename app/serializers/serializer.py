@@ -1,6 +1,5 @@
 from typing import Generic, Type, TypeVar
 
-from pydantic import BaseModel
 from pydantic import BaseModel as PydanticBaseModel
 
 from app.model.base import BaseModel
