@@ -22,6 +22,16 @@ async def get_balance_repository() -> BalanceRepository:
     return BalanceRepository(BalanceModel)
 
 
+async def get_vacation_repository() -> VacationRepository:
+    """Returns an instance of the vacation repository."""
+    return VacationRepository(VacationModel)
+
+
+async def get_team_repository() -> TeamRepository:
+    """Returns an instance of the team repository."""
+    return TeamRepository(TeamModel)
+
+
 async def get_employee_service(
     db: Session = Depends(get_db),
     employee_repository: EmployeeRepository = Depends(get_employee_repository),
