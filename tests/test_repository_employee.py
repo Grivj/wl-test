@@ -2,23 +2,22 @@ import unittest
 
 from pydantic import ValidationError
 
-from app.model import EmployeeModel
-from app.repository.employee import EmployeeRepository
+from app.api.dependencies import get_employee_repository
 from app.schema.employee import EmployeeCreate, EmployeeUpdate
 from tests.utils import get_test_db
 
 
 class TestEmployeeRepository(unittest.TestCase):
-    def setUp(self):
+    async def asyncSetUp(self):
         self.session = get_test_db()
-        self.repository = EmployeeRepository(EmployeeModel)
+        self.repository = await get_employee_repository()
 
         self.dummy_employee = EmployeeCreate(
             first_name="Jerome",
             last_name="Powell",
         )
 
-    def test_create_employee(self):
+    async def test_create_employee(self):
         # test successful creation
         employee = self.repository.create_employee(self.session, self.dummy_employee)
         self.assertEqual(employee.first_name, self.dummy_employee.first_name)
@@ -33,14 +32,14 @@ class TestEmployeeRepository(unittest.TestCase):
         assert employee is not None
         self.assertEqual(employee.first_name, self.dummy_employee.first_name)
 
-    def test_delete_employee(self):
+    async def test_delete_employee(self):
         # test delete employee
         employee = self.repository.create_employee(self.session, self.dummy_employee)
         self.repository.delete_employee(self.session, employee)
         employee = self.repository.get_employee_by_id(self.session, employee.id)
         self.assertIsNone(employee)
 
-    def test_update_employee(self):
+    async def test_update_employee(self):
         # create employee
         employee = self.repository.create_employee(self.session, self.dummy_employee)
 
