@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.model import EmployeeModel, TeamModel
 from app.repository.base import BaseRepository
-from app.schema.employee import EmployeeCreate
+from app.schema.employee import EmployeeCreate, EmployeeUpdate
 from app.serializers import Serializer
 
 
@@ -22,6 +22,14 @@ class _EmployeeRepository(BaseRepository[EmployeeModel]):
 
     def delete_employee(self, session: Session, employee: EmployeeModel) -> None:
         self.delete(session, employee)
+
+    def update_employee(
+        self, session: Session, employee: EmployeeModel, data: EmployeeUpdate
+    ) -> EmployeeModel:
+        for field in data.dict(exclude_unset=True):
+            setattr(employee, field, getattr(data, field))
+        self.update(session, employee)
+        return employee
 
     def update_team(
         self, session: Session, employee: EmployeeModel, team: TeamModel

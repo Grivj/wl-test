@@ -3,7 +3,7 @@ import unittest
 from pydantic import ValidationError
 
 from app.repository.employee import EmployeeRepository
-from app.schema.employee import EmployeeCreate
+from app.schema.employee import EmployeeCreate, EmployeeUpdate
 from tests.utils import get_test_db
 
 
@@ -38,3 +38,28 @@ class TestEmployeeRepository(unittest.TestCase):
         self.repository.delete_employee(self.session, employee)
         employee = self.repository.get_employee_by_id(self.session, employee.id)
         self.assertIsNone(employee)
+
+    def test_update_employee(self):
+        # create employee
+        employee = self.repository.create_employee(self.session, self.dummy_employee)
+
+        # update employee
+        updated_employee_data = EmployeeUpdate(first_name="Janet")
+        updated_employee = self.repository.update_employee(
+            self.session, employee, updated_employee_data
+        )
+        # at that point, the employee has been updated in the database and
+        # should be named Janet Powell
+
+        # retrieve updated employee
+        retrieved_employee = self.repository.get_employee_by_id(
+            self.session, employee.id
+        )
+
+        self.assertIsNotNone(retrieved_employee)
+        assert retrieved_employee is not None
+
+        # check that employee was successfully updated
+        self.assertEqual(updated_employee.first_name, "Janet")
+        self.assertEqual(retrieved_employee.first_name, "Janet")
+        self.assertEqual(updated_employee.id, retrieved_employee.id)

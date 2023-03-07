@@ -25,6 +25,11 @@ class EmployeeCreate(EmployeeBase):
     ...
 
 
+class EmployeeUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+
+
 class Employee(EmployeeBase):
     id: UUID
 
