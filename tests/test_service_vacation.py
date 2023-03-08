@@ -2,7 +2,11 @@ import unittest
 from datetime import date
 from uuid import UUID
 
-from app.api.dependencies import get_employee_repository, get_vacation_service
+from app.api.dependencies import (
+    get_employee_repository,
+    get_vacation_domain_service,
+    get_vacation_service,
+)
 from app.model import VacationModel
 from app.schema.employee import EmployeeCreate
 from app.schema.vacation import VacationCreate, VacationType
@@ -14,6 +18,7 @@ class TestVacationService(unittest.TestCase):
         self.session = get_test_db()
         self.service = await get_vacation_service()
         self.employee_repository = await get_employee_repository()
+        self.domain_service = await get_vacation_domain_service()
 
         # create some dummy employees
         self.jerome = self.employee_repository.create_employee(
@@ -307,3 +312,52 @@ class TestVacationService(unittest.TestCase):
         # assert the employees were returned
         self.assertEqual(len(employees), 1)
         self.assertEqual(employees, {self.jim})
+
+    async def test_can_employee_take_vacation(self):
+        # create some vacations to reduce the employee's balance
+        self.service.create_vacation(
+            self.session,
+            VacationCreate(
+                employee_id=self.jerome.id,
+                start_date=date(2021, 1, 1),
+                end_date=date(2021, 1, 3),
+                type=VacationType.PAID,
+            ),
+        )
+        self.service.create_vacation(
+            self.session,
+            VacationCreate(
+                employee_id=self.jerome.id,
+                start_date=date(2021, 1, 5),
+                end_date=date(2021, 1, 7),
+                type=VacationType.PAID,
+            ),
+        )
+
+        # check if employee can take vacation
+        can_take_vacation = self.domain_service.can_employee_take_vacation(
+            self.session,
+            self.jerome,
+            VacationCreate(
+                employee_id=self.jerome.id,
+                start_date=date(2021, 1, 10),
+                end_date=date(2021, 1, 20),
+                type=VacationType.PAID,
+            ),
+            balance_repository=self.service.balance_repository,
+        )
+        self.assertFalse(can_take_vacation)
+
+        # check if employee can take another vacation
+        can_take_vacation = self.domain_service.can_employee_take_vacation(
+            self.session,
+            self.jerome,
+            VacationCreate(
+                employee_id=self.jerome.id,
+                start_date=date(2021, 1, 15),
+                end_date=date(2021, 1, 20),
+                type=VacationType.PAID,
+            ),
+            balance_repository=self.service.balance_repository,
+        )
+        self.assertTrue(can_take_vacation)

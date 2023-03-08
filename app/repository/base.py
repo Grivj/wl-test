@@ -1,4 +1,3 @@
-import uuid as uid
 from typing import Generic, Type, TypeVar
 
 from sqlalchemy.exc import IntegrityError
